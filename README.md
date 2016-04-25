@@ -67,8 +67,8 @@ The YAN-PRTools matlab toolbox now includes 40 common pattern recognition algori
 	
 **Classification**
 
-	model = classf_softmax_tr(X,Y,param) % training
-	[pred,prob] = classf_softmax_te(model,Xtest) % test, return the predicted labels and probabilities (optional)
+	model = classf_xxx_tr(X,Y,param) % training
+	[pred,prob] = classf_xxx_te(model,Xtest) % test, return the predicted labels and probabilities (optional)
 	
 **Regression**
 
@@ -85,7 +85,7 @@ The YAN-PRTools matlab toolbox now includes 40 common pattern recognition algori
 
 Please see test.m for sample usages.
 
-Besides, there are three uniform wrappers: ftProc_, classf_, regress_. They accept algorithm name strings as inputs and combines the training and test phase.
+Besides, there are three uniform wrappers: ftProc_, classf_, regress_. They accept algorithm name strings as inputs and combine the training and test phase.
 
 <br>
 <h2><font color="green">Characteristics</font></h2>
