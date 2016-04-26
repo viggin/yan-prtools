@@ -1,8 +1,10 @@
-function err = getErrRate_example(x,userdata)
+function err = test_getErrRate(maFt,userdata)
 %Sample code for computing the error rate of a feature group, used in wrapper 
 % feature selection methods like FTSEL_GA, FTSEL_SFS, FTSEL_SINGLEFTPRED
+%	maFt: mask for feature indices
+%	userdata: struct contains fields: ft, target, cvObj. see FTSEL_GA
 
-ftIdx = find(x);
+ftIdx = find(maFt);
 nCv = userdata.cvObj.NumTestSets;
 nSmp = size(userdata.ft,1);
 pred_label = nan(nSmp,1);

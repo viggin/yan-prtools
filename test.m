@@ -3,32 +3,16 @@
 % their effectiveness, since the accuracies depend on dataset, feature
 % preprocessing, and algorithm parameters.
 
-%% data for ftProc and classfication
 close all
-
-% data 1
-% load ionosphere
-% Y = (cell2mat(Y)=='b')+1; % text label to number
-
-% data 2, binary classes
-% d = 100; n = 50; s = 10;
-% X = [mvnrnd(randn(1,d),eye(d)*s,n);mvnrnd(randn(1,d),eye(d)*s,n);
-% 	mvnrnd(randn(1,d),eye(d)*s,n);mvnrnd(randn(1,d),eye(d)*s,n)];
-% Y = [ones(n*2,1);ones(n*2,1)*2];
-
-% data 3, multi-class
-d = 100; n = 50; s = 10;
-X = [mvnrnd(randn(1,d),eye(d)*s,n);mvnrnd(randn(1,d),eye(d)*s,n);
-	mvnrnd(randn(1,d),eye(d)*s,n);mvnrnd(randn(1,d),eye(d)*s,n);
-	mvnrnd(randn(1,d),eye(d)*s,n);mvnrnd(randn(1,d),eye(d)*s,n)];
-Y = [ones(n*2,1);ones(n*2,1)*2;ones(n*2,1)*3];
 
 %% example of ftProc
 %{1
+dsName = 'multi-class two gauss'; % see test_genDataset.m for more datasets
+[X,Y] = test_genDataset(dsName);
 [Xnew, model] = ftProc_pca_tr(X,[],struct('pcaCoef',2)); % PCA
 figure,gscatter(Xnew(:,1),Xnew(:,2),Y), title('PCA')
 
-trainIdx = randperm(size(X,1),ceil(size(X,1)/2));
+trainIdx = randperm(size(X,1),ceil(size(X,1)*.6));
 testIdx = setdiff(1:size(X,1),trainIdx);
 [XtrNew, model] = ftProc_lda_tr(X(trainIdx,:),Y(trainIdx),...
 	struct('postLdaDim',2)); % LDA
@@ -42,6 +26,8 @@ title('LDA')
 %% classfication
 %{1
 fprintf('\n>>>>>>classfication:\n')
+dsName = 'binary-class two gauss'; % see test_genDataset.m for more datasets
+[X,Y] = test_genDataset(dsName);
 cvObj = cvpartition(Y,'k',10);
 mtdNames = {'svm','knn','lr','ann','boost',...
 	'elm','rf','gauss','softmax','tree'};
@@ -70,71 +56,10 @@ for iMtd = 1:nMtd
 end
 %}
 
-%% feature selection
-fprintf('\n>>>>>>feature selection:\n')
-
-useSyntheticData = 0;
-if useSyntheticData
-	d = 10; n = 100; s = 1;
-	X = randn(n,d); % useful features 1:d
-	Y = double((X*rand(d,1)+rand(n,1)*s)>0)+1;
-	X = [X,randn(n,d)]; % noise features d+1:d*2
-else
-	load ionosphere
-	Y = (cell2mat(Y)=='b')+1; % text label to number
-	d = 5;
-end
-
-trainIdx = randperm(size(X,1),ceil(size(X,1)/2));
-testIdx = setdiff(1:size(X,1),trainIdx);
-
-cvObj = cvpartition(Y(testIdx),'k',10);
-userdata.cvObj = cvObj;
-userdata.ft = X(testIdx,:);
-userdata.target = Y(testIdx);
-if useSyntheticData
-	x = false(1,d*2);
-	x(1:d) = true;
-	fprintf('ground truth test err: %.4f%%\n', getErrRate_example(x,userdata)*100);
-else
-	x = true(1,size(X,2));
-	fprintf('all features test err: %.4f%%\n', getErrRate_example(x,userdata)*100);
-end
-
-mtds = {
-	@ftSel_corr, @ftSel_fisher, @ftSel_ga, @ftSel_mrmr, @ftSel_rf,...
-	@ftSel_sfs,	@ftSel_single, @ftSel_stepwisefit,...
-	@ftSel_svmrfe_ori, @ftSel_svmrfe_ker,...
-	@ftSel_boost
-	};
-nMtd = length(mtds);
-for iMtd = 1:nMtd
-	fprintf([func2str(mtds{iMtd}) ': '])
-	% feature selection only on training set
-	[ftRank,ftScore] = mtds{iMtd}(X(trainIdx,:),Y(trainIdx));
-	fprintf('%d,',ftRank)
-	
-	x = false(1,d*2);
-	x(ftRank(1:min(length(ftRank),d))) = true;
-	fprintf('\ntest err: %.4f%%\n', getErrRate_example(x,userdata)*100);
-
-	fprintf('\n')
-end
-
 %% regression
 fprintf('\n>>>>>>regression:\n')
-
-useSyntheticData = 1;
-if useSyntheticData
-	d = 10; n = 100; s = .1;
-	X = randn(n,d); % useful features 1:d
-	Y = X*rand(d,1)+randn(n,1)*s;
-	X = [X,randn(n,2)]; % noise features
-else
-	load spectra
-	Y = octane;
-	X = NIR;
-end
+dsName = 'regression synthetic'; % see test_genDataset.m for more datasets
+[X,Y] = test_genDataset(dsName);
 
 cvObj = cvpartition(size(X,1),'k',5);
 mtdNames = {...
@@ -164,20 +89,54 @@ for iMtd = 1:nMtd
 	fprintf(', test err: %.4f\n',errTable{iMtd,2})
 end
 
-%% sample selection (active learning)
-useSyntheticData = 1;
-if useSyntheticData
-	d = 100; n = 50; s = 10;
-	X = [mvnrnd(randn(1,d),eye(d)*s,n);mvnrnd(randn(1,d),eye(d)*s,n);
-		mvnrnd(randn(1,d),eye(d)*s,n);mvnrnd(randn(1,d),eye(d)*s,n)];
-	Y = [ones(n*2,1);ones(n*2,1)*2];
+%% feature selection
+fprintf('\n>>>>>>feature selection:\n')
+dsName = 'classf ionosphere'; % see test_genDataset.m for more datasets
+[X,Y] = test_genDataset(dsName);
+
+trainIdx = randperm(size(X,1),ceil(size(X,1)/2));
+testIdx = setdiff(1:size(X,1),trainIdx);
+
+cvObj = cvpartition(Y(testIdx),'k',10);
+userdata.cvObj = cvObj;
+userdata.ft = X(testIdx,:);
+userdata.target = Y(testIdx);
+if strcmp('dsName','ftSel synthetic')
+	nSel = 10;
+	maFt = false(1,size(X,2)); % mask for feature indices
+	maFt(1:nSel) = true;
+	fprintf('ground truth test err: %.4f%%\n', test_getErrRate(maFt,userdata)*100);
 else
-	load ionosphere
-	Y = (cell2mat(Y)=='b')+1; % text label to number
-	d = 5;
+	nSel = 10;
+	maFt = true(1,size(X,2));
+	fprintf('all features test err: %.4f%%\n', test_getErrRate(maFt,userdata)*100);
 end
 
-fprintf('\n>>>>>>sample selection:\n')
+mtds = {
+	@ftSel_corr, @ftSel_fisher, @ftSel_mrmr,... % filters
+	@ftSel_single, @ftSel_sfs,	@ftSel_ga,... % wrappers
+	@ftSel_rf,	@ftSel_stepwisefit,	@ftSel_svmrfe_ori, @ftSel_svmrfe_ker,...
+	@ftSel_boost % embedded
+	};
+nMtd = length(mtds);
+for iMtd = 1:nMtd
+	fprintf([func2str(mtds{iMtd}) ': '])
+	% feature selection only on training set
+	[ftRank,ftScore] = mtds{iMtd}(X(trainIdx,:),Y(trainIdx));
+	fprintf('%d,',ftRank)
+	
+	maFt = false(1,size(X,2));
+	maFt(ftRank(1:min(length(ftRank),nSel))) = true;
+	fprintf('\ntest err: %.4f%%\n', test_getErrRate(maFt,userdata)*100);
+
+	fprintf('\n')
+end
+
+%% sample selection (active learning)
+fprintf('>>>>>>sample selection:\n')
+dsName = 'multi-class two gauss'; % see test_genDataset.m for more datasets
+[X,Y] = test_genDataset(dsName);
+
 mtds = {@smpSel_ks,@smpSel_ted,@smpSel_llr,@smpSel_cluster};
 nMtd = length(mtds);
 nSel = 20;
@@ -196,5 +155,5 @@ for iMtd = 1:nMtd
 	trIdx = candidateIdx(smpList);
 	[pred] = classf_('lr',X(trIdx,:),Y(trIdx),[],X(testIdx,:));
 	err = nnz(pred~=Y(testIdx))/length(pred);
-	fprintf('\ntest err=%.4f%%\n\n',err*100)
+	fprintf('\ntest err: %.4f%%\n\n',err*100)
 end

@@ -4,7 +4,8 @@ function [model] = classf_tree_tr(X,Y,param)
 % Can search the doc of ClassificationTree for further configurations.
 %	X : each row is a sample.
 %	Y : a column vector, class labels for X starting from 1.
-%	PARAM: struct of parameters. Currently not used.
+%	PARAM: struct of parameters. Please see the doc of ClassificationTree
+% and add your parameters in the code.
 % Return:
 %	MODEL: a struct containing coefficients.
 % 

@@ -21,8 +21,8 @@ popSize = 20;
 maxIter = 3;
 stallGenLimit = 2;
 tolFun = eps;
-getErrRateFunc = @getErrRate_example; % user-defined function for computing the score
-								  % of each chromosome
+getErrRateFunc = @test_getErrRate; % user-defined function for computing the score
+								   % of each chromosome
 nCv = 5; % the number of cross-validation when computing the score
 
 defParam

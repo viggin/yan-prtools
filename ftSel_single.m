@@ -14,6 +14,8 @@ function [ftRank,ftScore] = ftSel_single(ft,target,param)
 %	Ke YAN, 2016, Tsinghua Univ. http://yanke23.com, xjed09@gmail.com
 
 nCv = 5;
+getErrRateFunc = @test_getErrRate; % user-defined function for computing the score
+								   % of each chromosome
 
 defParam
 
@@ -27,7 +29,7 @@ errs = zeros(1,nFt);
 for p = 1:nFt
 	x = false(1,nFt);
 	x(p) = true;
-	errs(p) = getErrRate_example(x,userdata);
+	errs(p) = getErrRateFunc(x,userdata);
 end
 
 [ftScore,ftRank] = sort(errs,'ascend');

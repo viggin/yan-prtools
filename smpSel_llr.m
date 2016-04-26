@@ -18,6 +18,8 @@ function [ smpList ] = smpSel_llr( X,nSel,param )
 %	Ke YAN, 2016, Tsinghua Univ. http://yanke23.com, xjed09@gmail.com
 
 mu = 10^(-1); % see Eq. 13 of the ref
+nNeighbor = 5; % used in getLLEWeight
+
 defParam
 
 [nSmp,nFt] = size(X);
@@ -25,7 +27,7 @@ if nSel >= nSmp,
 	nSel = nSmp;
 end
 
-W = getLLEWeight(X,X);
+W = getLLEWeight(X,X,nNeighbor);
 I = eye(nSmp);
 M = I-W;
 M = M'*M;
@@ -48,7 +50,7 @@ end
 
 end
 
-function W = getLLEWeight(X,Y)
+function W = getLLEWeight(X,Y,nNeighbor)
 % ref to Nonlinear Dimensionality Reduction by Locally Linear Embedding,
 % Science, 2000
 % use the neighbors of Y(i,:) in X to reconstruct it
@@ -59,7 +61,6 @@ function W = getLLEWeight(X,Y)
 [nSmpX,nFt] = size(X);
 nSmpY = size(Y,1);
 W = zeros(nSmpY,nSmpX);
-nNeighbor = 10;
 if nNeighbor > nSmpX-1, nNeighbor = nSmpX-1; end
 for p = 1:nSmpY
 	idx = knnsearch(X,Y(p,:),'K',nNeighbor+1);

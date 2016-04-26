@@ -16,6 +16,8 @@ function [ftSubset,ftScore] = ftSel_sfs(ft,target,param)
 [nSmp,nFt] = size(ft);
 nCv = 5; % number of cross-validation when evaluating features
 nSel = min(10,nFt); % number of features to select
+getErrRateFunc = @test_getErrRate; % user-defined function for computing the score
+								   % of each chromosome
 showVerboseInfo = 1;
 
 defParam
@@ -40,7 +42,7 @@ for sfIdx = 1:nSel
 		curFt = [selFt ftIdx];
 		x = false(1,nFt);
 		x(curFt) = true;
-		err1(ftIdx) = getErrRate_example(x,userdata);
+		err1(ftIdx) = getErrRateFunc(x,userdata);
 	end
 	selTimeCost(sfIdx) = toc;
 	

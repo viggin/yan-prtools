@@ -29,14 +29,14 @@ X = bsxfun(@minus,X,mu);
 
 % sort X by label
 [Y, I] = sort(Y);
-X = X(I,:);
+Xperm = X(I,:); % permuted X
 [~, I ,~] = unique(Y,'legacy');
 
 nSmpCls = [I(1);diff(I)];
 J = I-nSmpCls+1;
 
 % calculate within-class average
-delta_X = X;
+delta_X = Xperm;
 mu_per_class = zeros(nClass,nFt);
 for p = 1:nClass
 	mu_per_class(p,:) = mean(delta_X(J(p):I(p),:),1);
